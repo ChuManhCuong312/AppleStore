@@ -40,7 +40,7 @@ jobs:
       with:
         context: .                       # Thư mục gốc
         push: true                       # Cho phép đẩy lên Docker Hub
-        tags: yourdockerhubuser/applestore:latest  # Tên image Docker
+        tags: yourdockerhubuser/applestore:latest  # Tên image Docker: thay yourdockerhubuser thành tên Docker Hub thật
 
     # Lấy Webhook trong Render: Vào Render.com > App > Deploy > Manual Deploy > copy Deploy Hook URL   
     - name: 🚀 Trigger redeploy on Render
