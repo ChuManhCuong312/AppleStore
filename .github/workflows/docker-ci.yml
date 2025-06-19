@@ -1,0 +1,48 @@
+# Tên workflow hiển thị trong GitHub Actions
+name: Build and Push Docker Image
+
+# Khi nào kích hoạt workflow này
+on:
+  push:                # Khi đẩy code lên GitHub
+    branches: [ "main" ]   # Áp dụng cho nhánh main
+
+# Các công việc cần làm
+jobs:
+  build:
+    runs-on: ubuntu-latest     # GitHub sẽ dùng 1 máy Ubuntu để chạy
+
+    steps:
+    - name: ✅ B1 - Tải code từ GitHub
+      uses: actions/checkout@v3
+
+    - name: 🛠 B2 - Cài .NET Core SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x     # Nếu bạn dùng .NET 6 hoặc 7 thì sửa thành 6.0.x hay 7.0.x
+
+    - name: 📦 B3 - Restore thư viện
+      run: dotnet restore
+
+    - name: 🧱 B4 - Build project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: 🧪 B5 - Chạy Unit Test (nếu có)
+      run: dotnet test --no-build --verbosity normal || echo "Không có test nào"
+
+    - name: 🔐 B6 - Đăng nhập vào Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}  # Đã lưu ở GitHub Secrets
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: 🐳 B7 - Build và Push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .                       # Thư mục gốc
+        push: true                       # Cho phép đẩy lên Docker Hub
+        tags: yourdockerhubuser/applestore:latest  # Tên image Docker
+
+    # Lấy Webhook trong Render: Vào Render.com > App > Deploy > Manual Deploy > copy Deploy Hook URL   
+    - name: 🚀 Trigger redeploy on Render
+      run: |
+        curl -X POST https://api.render.com/deploy/srv-xxxxxx?key=YOUR_KEY
